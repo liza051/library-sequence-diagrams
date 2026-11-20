@@ -15,7 +15,7 @@ The project includes sequence diagrams for:
 ## Project Structure
 - `sequence/` — sequence diagram source files and rendered diagrams.
 - `audit/` — consistency audit.
-- `ai/` — AI prompts, responses, and feedback.
+- `ai/` — AI usage log.
 - `spec.md` — scenario and participant specification.
 - `DEFENSE.md` — project defense.
 
