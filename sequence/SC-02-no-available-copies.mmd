@@ -3,29 +3,29 @@ sequenceDiagram
     participant UI as ReservationUI
     participant Service as ReservationService
     participant Copy as BookCopy
-    participant Reservation
 
-    Reader->>UI: submitReservation(copyId)
+    Note over Reader,UI: Precondition: Reader is registered
+
+    Reader->>UI: selectBook(bookId)
     activate UI
 
-    UI->>Service: createReservation(readerId, copyId)
+    Reader->>UI: submitReservation(bookId)
+
+    UI->>Service: createReservationRequest(readerId, bookId)
     activate Service
 
-    Service->>Copy: checkAvailability(bookId)
-    activate Copy
-    Copy-->>Service: noAvailableCopies
-    deactivate Copy
+    Service->>Service: validateReservationRequest(readerId, bookId)
 
-    alt No copies are available
+    loop For each physical copy of the selected book
+        Service->>Copy: checkAvailability(copyId)
+        activate Copy
+        Copy-->>Service: status = unavailable
+        deactivate Copy
+    end
+
+    break No available copies
         Service-->>UI: rejectReservation()
         UI-->>Reader: displayNoCopiesMessage()
-    else A copy becomes available
-        Service->>Reservation: create(readerId, copyId)
-        activate Reservation
-        Reservation-->>Service: reservationCreated
-        deactivate Reservation
-        Service-->>UI: reservationConfirmed()
-        UI-->>Reader: displayConfirmation()
     end
 
     deactivate Service
