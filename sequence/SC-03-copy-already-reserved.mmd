@@ -2,8 +2,9 @@ sequenceDiagram
     actor Reader
     participant UI as ReservationUI
     participant Service as ReservationService
-    participant Copy as BookCopy
     participant Reservation
+
+    Note over Reader,UI: Precondition: Reader is registered
 
     Reader->>UI: submitReservation(copyId)
     activate UI
@@ -11,21 +12,16 @@ sequenceDiagram
     UI->>Service: createReservation(readerId, copyId)
     activate Service
 
-    Service->>Copy: checkStatus(copyId)
-    activate Copy
-    Copy-->>Service: status = reserved
-    deactivate Copy
+    Service->>Service: validateReservationRequest(readerId, copyId)
 
-    alt Copy is already reserved
-        Service-->>UI: rejectReservation()
-        UI-->>Reader: displayAlreadyReservedMessage()
-    else Copy is available
-        Service->>Reservation: create(readerId, copyId)
-        activate Reservation
-        Reservation-->>Service: reservationCreated
-        deactivate Reservation
-        Service-->>UI: reservationConfirmed()
-        UI-->>Reader: displayConfirmation()
+    Service->>Reservation: findActiveReservation(copyId)
+    activate Reservation
+    Reservation-->>Service: activeReservationExists
+    deactivate Reservation
+
+    break Active reservation exists
+    Service-->>UI: rejectReservation()
+    UI-->>Reader: displayAlreadyReservedMessage()
     end
 
     deactivate Service
